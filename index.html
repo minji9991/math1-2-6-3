@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>다각형의 대각선 탐구</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="loginLayer" class="login-layer">
+    <form id="loginForm" class="login-card">
+      <div class="eyebrow">2026 수학 웹활동지</div>
+      <h1>다각형의 대각선 탐구</h1>
+      <p>학번을 입력하고 활동을 시작하세요.</p>
+      <label for="studentId">학번</label>
+      <input id="studentId" name="studentId" inputmode="numeric" maxlength="8" placeholder="예: 10507" required />
+      <button type="submit" class="primary">활동 시작</button>
+      <p id="loginMsg" class="message" aria-live="polite"></p>
+    </form>
+  </div>
+
+  <header class="topbar">
+    <div>
+      <span class="unit">02</span>
+      <h1>다각형의 대각선 개수</h1>
+    </div>
+    <div class="status-wrap">
+      <span id="studentBadge" class="badge">미접속</span>
+      <span id="saveBadge" class="badge subtle">저장 대기</span>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="goal">
+      <strong>학습 목표</strong>
+      <span>다각형의 대각선의 개수를 직접 탐구하고 일반화할 수 있다.</span>
+    </section>
+
+    <section class="card" data-step="1">
+      <div class="step-head"><span class="step-no">1</span><div><h2>한 꼭짓점에서 대각선을 그어 보자</h2><p>A에서 출발하여, 변이 아닌 선분을 모두 그어 보세요.</p></div></div>
+      <div id="polygonPractice" class="polygon-grid"></div>
+      <div id="step1Feedback" class="feedback" aria-live="polite"></div>
+    </section>
+
+    <section class="card" data-step="2">
+      <div class="step-head"><span class="step-no">2</span><div><h2>규칙을 일반화해 보자</h2><p>n각형의 한 꼭짓점에서 그을 수 있는 대각선의 개수는?</p></div></div>
+      <div class="formula-entry">
+        <input id="oneVertexFormula" aria-label="n각형 한 꼭짓점 대각선 개수" placeholder="식 입력" />
+        <button id="checkOneVertex" type="button">확인</button>
+      </div>
+      <div id="step2Feedback" class="feedback" aria-live="polite"></div>
+    </section>
+
+    <section class="card" data-step="3">
+      <div class="step-head"><span class="step-no">3</span><div><h2>대각선의 방향을 생각해 보자</h2><p>오각형 ABCDE에서 선분 AC와 선분 CA는 서로 같은 대각선이다.</p></div></div>
+      <div class="ox-row">
+        <button class="ox" data-answer="O" type="button">O</button>
+        <button class="ox" data-answer="X" type="button">X</button>
+      </div>
+      <div id="step3Feedback" class="feedback" aria-live="polite"></div>
+    </section>
+
+    <section class="card" data-step="4">
+      <div class="step-head"><span class="step-no">4</span><div><h2>오각형의 대각선을 양방향으로 모두 그어 보자</h2><p>시작 꼭짓점을 누른 뒤, 끝 꼭짓점을 누르세요. 같은 실제 대각선도 방향이 반대면 두 번 그려집니다.</p></div></div>
+      <div class="directed-wrap">
+        <div id="directedPentagon" class="svg-stage"></div>
+        <aside class="mini-panel">
+          <div>그은 방향 대각선</div>
+          <strong><span id="directedCount">0</span> / 10</strong>
+          <p id="directedHint">꼭짓점 두 개를 차례로 선택하세요.</p>
+        </aside>
+      </div>
+      <div id="pairArea" class="pair-area hidden">
+        <h3>같은 실제 대각선끼리 짝지어 보자</h3>
+        <p>예: AC와 CA는 같은 선분입니다. 카드 두 개를 차례로 눌러 짝을 만드세요.</p>
+        <div id="pairChips" class="chips"></div>
+        <div id="pairResult" class="feedback"></div>
+      </div>
+    </section>
+
+    <section class="card" data-step="5">
+      <div class="step-head"><span class="step-no">5</span><div><h2>n각형의 전체 대각선 개수를 일반화해 보자</h2><p>모든 꼭짓점에서 센 뒤, 같은 대각선이 몇 번씩 중복되는지 생각해 보세요.</p></div></div>
+      <div class="general-grid">
+        <label>모든 꼭짓점에서 방향을 따져 세면
+          <input id="directedFormula" placeholder="예: n(n-3)" />
+        </label>
+        <label>실제 대각선의 개수는
+          <input id="finalFormula" placeholder="식 입력" />
+        </label>
+      </div>
+      <button id="checkFinal" class="primary small" type="button">일반화 확인</button>
+      <div id="step5Feedback" class="feedback" aria-live="polite"></div>
+    </section>
+
+    <section class="finish-card">
+      <h2>탐구 완료</h2>
+      <p>모든 활동이 끝나면 제출 버튼을 누르세요.</p>
+      <button id="submitAll" class="primary" type="button">활동 제출</button>
+      <div id="submitFeedback" class="feedback" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
