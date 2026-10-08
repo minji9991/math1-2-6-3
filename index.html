@@ -3,29 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>다각형의 대각선 탐구</title>
+  <title>다각형의 내각, 외각의 크기의 합</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div id="loginLayer" class="login-layer">
     <form id="loginForm" class="login-card">
       <div class="eyebrow">2026 수학 웹활동지</div>
-      <h1>다각형의 대각선 탐구</h1>
+      <h1>다각형의 내각, 외각의 크기의 합</h1>
       <p>학번을 입력하고 활동을 시작하세요.</p>
       <label for="studentId">학번</label>
-      <input id="studentId" name="studentId" inputmode="numeric" maxlength="8" placeholder="예: 10507" required />
+      <input id="studentId" inputmode="numeric" maxlength="8" placeholder="예: 10507" required />
       <button type="submit" class="primary">활동 시작</button>
       <p id="loginMsg" class="message" aria-live="polite"></p>
     </form>
   </div>
 
   <header class="topbar">
-    <div>
+    <div class="title-wrap">
       <span class="unit">02</span>
-      <h1>다각형의 대각선 개수</h1>
+      <div>
+        <h1>다각형의 내각, 외각의 크기의 합</h1>
+        <p class="subtitle">직접 조작하고, 규칙을 찾아 식으로 정리해 봅시다.</p>
+      </div>
     </div>
     <div class="status-wrap">
       <span id="studentBadge" class="badge">미접속</span>
+      <span id="presenceBadge" class="badge subtle">상태 확인 중</span>
       <span id="saveBadge" class="badge subtle">저장 대기</span>
     </div>
   </header>
@@ -33,70 +37,147 @@
   <main class="page">
     <section class="goal">
       <strong>학습 목표</strong>
-      <span>다각형의 대각선의 개수를 직접 탐구하고 일반화할 수 있다.</span>
+      <span>다각형의 내각과 외각의 크기의 합을 구하고 설명할 수 있다.</span>
     </section>
 
-    <section class="card" data-step="1">
-      <div class="step-head"><span class="step-no">1</span><div><h2>한 꼭짓점에서 대각선을 그어 보자</h2><p>A에서 출발하여, 변이 아닌 선분을 모두 그어 보세요.</p></div></div>
-      <div id="polygonPractice" class="polygon-grid"></div>
-      <div id="step1Feedback" class="feedback" aria-live="polite"></div>
-    </section>
+    <section class="card gated" data-step="1">
+      <div class="lock-cover"><span>🔒</span><b>교사가 활동 1을 열면 시작할 수 있습니다.</b></div>
+      <div class="step-head"><span class="step-no">1</span><div><h2>다각형의 내각의 크기의 합은 어떻게 구할까?</h2><p>한 꼭짓점을 직접 정하고 대각선을 그어 삼각형으로 나누어 봅시다.</p></div></div>
+      <div id="interiorPolygons" class="polygon-grid"></div>
 
-    <section class="card" data-step="2">
-      <div class="step-head"><span class="step-no">2</span><div><h2>규칙을 일반화해 보자</h2><p>n각형의 한 꼭짓점에서 그을 수 있는 대각선의 개수는?</p></div></div>
-      <div class="formula-entry">
-        <input id="oneVertexFormula" aria-label="n각형 한 꼭짓점 대각선 개수" placeholder="식 입력" />
-        <button id="checkOneVertex" type="button">확인</button>
+      <div class="question-block">
+        <h3>삼각형의 내각의 크기의 합은 몇 도인가요?</h3>
+        <div class="inline-answer"><input id="triangleSum" inputmode="numeric" placeholder="숫자 입력" /><span>°</span><button id="checkTriangleSum" type="button">확인</button></div>
+        <div id="triangleSumFeedback" class="feedback"></div>
       </div>
-      <div id="step2Feedback" class="feedback" aria-live="polite"></div>
-    </section>
 
-    <section class="card" data-step="3">
-      <div class="step-head"><span class="step-no">3</span><div><h2>대각선의 방향을 생각해 보자</h2><p>오각형 ABCDE에서 선분 AC와 선분 CA는 서로 같은 대각선이다.</p></div></div>
-      <div class="ox-row">
-        <button class="ox" data-answer="O" type="button">O</button>
-        <button class="ox" data-answer="X" type="button">X</button>
+      <div class="table-wrap">
+        <table class="worksheet-table">
+          <thead><tr><th>다각형</th><th>사각형</th><th>오각형</th><th>육각형</th></tr></thead>
+          <tbody>
+            <tr><th>만들어지는 삼각형의 개수</th><td><select data-triangle-n="4"><option value="">선택</option><option>1</option><option>2</option><option>3</option><option>4</option></select></td><td><select data-triangle-n="5"><option value="">선택</option><option>2</option><option>3</option><option>4</option><option>5</option></select></td><td><select data-triangle-n="6"><option value="">선택</option><option>3</option><option>4</option><option>5</option><option>6</option></select></td></tr>
+            <tr><th>내각의 크기의 합</th><td><input data-sum-n="4" inputmode="numeric" placeholder="°" /></td><td><input data-sum-n="5" inputmode="numeric" placeholder="°" /></td><td><input data-sum-n="6" inputmode="numeric" placeholder="°" /></td></tr>
+          </tbody>
+        </table>
       </div>
-      <div id="step3Feedback" class="feedback" aria-live="polite"></div>
-    </section>
+      <button id="checkInteriorTable" class="primary small" type="button">표 확인</button>
+      <div id="interiorTableFeedback" class="feedback"></div>
 
-    <section class="card" data-step="4">
-      <div class="step-head"><span class="step-no">4</span><div><h2>오각형의 대각선을 양방향으로 모두 그어 보자</h2><p>시작 꼭짓점을 누른 뒤, 끝 꼭짓점을 누르세요. 같은 실제 대각선도 방향이 반대면 두 번 그려집니다.</p></div></div>
-      <div class="directed-wrap">
-        <div id="directedPentagon" class="svg-stage"></div>
-        <aside class="mini-panel">
-          <div>그은 방향 대각선</div>
-          <strong><span id="directedCount">0</span> / 10</strong>
-          <p id="directedHint">꼭짓점 두 개를 차례로 선택하세요.</p>
-        </aside>
-      </div>
-      <div id="pairArea" class="pair-area hidden">
-        <h3>같은 실제 대각선끼리 짝지어 보자</h3>
-        <p>예: AC와 CA는 같은 선분입니다. 카드 두 개를 차례로 눌러 짝을 만드세요.</p>
-        <div id="pairChips" class="chips"></div>
-        <div id="pairResult" class="feedback"></div>
-      </div>
-    </section>
-
-    <section class="card" data-step="5">
-      <div class="step-head"><span class="step-no">5</span><div><h2>n각형의 전체 대각선 개수를 일반화해 보자</h2><p>모든 꼭짓점에서 센 뒤, 같은 대각선이 몇 번씩 중복되는지 생각해 보세요.</p></div></div>
-      <div class="general-grid">
-        <label>모든 꼭짓점에서 방향을 따져 세면
-          <input id="directedFormula" placeholder="예: n(n-3)" />
+      <div class="generalize-box">
+        <label>앞의 규칙을 이용하면 <b>n각형</b>은 몇 개의 삼각형으로 나눌 수 있나요?
+          <div class="formula-entry"><input id="nTriangleCount" placeholder="식 입력" /><button id="checkNTriangle" type="button">확인</button></div>
         </label>
-        <label>실제 대각선의 개수는
-          <input id="finalFormula" placeholder="식 입력" />
+        <label>따라서 n각형의 내각의 크기의 합은?
+          <div class="formula-entry"><input id="interiorFormula" placeholder="식 입력" /><button id="checkInteriorFormula" type="button">확인</button></div>
         </label>
       </div>
-      <button id="checkFinal" class="primary small" type="button">일반화 확인</button>
-      <div id="step5Feedback" class="feedback" aria-live="polite"></div>
+      <div id="step1Feedback" class="feedback"></div>
+    </section>
+
+    <section class="card gated" data-step="2">
+      <div class="lock-cover"><span>🔒</span><b>교사가 활동 2를 열면 시작할 수 있습니다.</b></div>
+      <div class="step-head"><span class="step-no">2</span><div><h2>개념 적용하기 · 내각</h2><p>다각형의 내각의 크기의 합을 이용하여 x의 값을 구해 봅시다.</p></div></div>
+      <div class="apply-grid">
+        <div id="interiorApplyFigure" class="figure-card"></div>
+        <div class="question-panel"><p>오각형의 내각이 90°, 120°, 110°, 150°, x°일 때</p><label>x = <input id="interiorX" inputmode="numeric" /> °</label><button id="checkInteriorX" class="primary small" type="button">확인</button><div id="interiorXFeedback" class="feedback"></div></div>
+      </div>
+    </section>
+
+    <section class="card gated" data-step="3">
+      <div class="lock-cover"><span>🔒</span><b>교사가 활동 3을 열면 시작할 수 있습니다.</b></div>
+      <div class="step-head"><span class="step-no">3</span><div><h2>다각형의 외각의 크기의 합은 어떻게 구할까?</h2><p>도형의 모양을 바꿔도 외각의 합이 같은지 직접 확인해 봅시다.</p></div></div>
+      <div class="experiment-grid">
+        <div class="experiment-card">
+          <h3>사각형</h3>
+          <p>꼭짓점을 드래그하여 모양을 바꾼 뒤 연장선을 만들어 보세요.</p>
+          <div id="quadExterior" class="interactive-stage"></div>
+          <button class="secondary" data-extension-for="4" type="button">연장선 만들기</button>
+          <div class="move-actions"><button class="secondary" data-gather-for="4" type="button" disabled>선택한 외각을 한 점에 모으기</button><span data-ext-status="4">외각 0 / 4 선택</span></div>
+        </div>
+        <div class="experiment-card">
+          <h3>오각형</h3>
+          <p>꼭짓점을 드래그하여 모양을 바꾼 뒤 같은 활동을 해 보세요.</p>
+          <div id="pentExterior" class="interactive-stage"></div>
+          <button class="secondary" data-extension-for="5" type="button">연장선 만들기</button>
+          <div class="move-actions"><button class="secondary" data-gather-for="5" type="button" disabled>선택한 외각을 한 점에 모으기</button><span data-ext-status="5">외각 0 / 5 선택</span></div>
+        </div>
+      </div>
+      <div class="conclusion-row"><span>사각형과 오각형에서 확인한 외각의 크기의 합은</span><input id="exteriorSumAnswer" inputmode="numeric" placeholder="숫자" /><span>°</span><button id="checkExteriorSum" type="button">확인</button></div>
+      <div id="exteriorExperimentFeedback" class="feedback"></div>
+    </section>
+
+    <section class="card gated" data-step="4">
+      <div class="lock-cover"><span>🔒</span><b>교사가 활동 4를 열면 시작할 수 있습니다.</b></div>
+      <div class="step-head"><span class="step-no">4</span><div><h2>왜 외각의 크기의 합은 360°일까?</h2><p>내각과 외각의 관계를 이용해 식으로 설명해 봅시다.</p></div></div>
+      <div class="reason-layout">
+        <div id="reasonPolygon" class="interactive-stage reason-stage"></div>
+        <div class="reason-controls">
+          <button id="interiorSumButton" class="concept-button" disabled>내각의 크기의 합</button>
+          <div id="interiorFormulaReveal" class="formula-reveal hidden">180° × (<input id="reasonNMinus" class="tiny-input" placeholder="식" />)</div>
+          <button id="exteriorSumButton" class="concept-button" disabled>외각의 크기의 합</button>
+          <button id="straightButton" class="concept-button" disabled>한 꼭짓점의 내각 + 외각 = 평각</button>
+          <div id="straightReveal" class="formula-reveal hidden">모든 꼭짓점에서 합하면 180° × n</div>
+          <div id="masterRelation" class="master-relation hidden">(내각의 크기의 합) + (외각의 크기의 합) = 180° × n</div>
+        </div>
+      </div>
+
+      <div id="derivationArea" class="derivation hidden">
+        <h3>빈칸을 끌어 놓아 식을 완성해 보세요.</h3>
+        <div class="equation-line"><span>(내각의 크기의 합)</span><span>+</span><span>(외각의 크기의 합)</span><span>=</span><span class="dropzone" data-accept="180n">여기에 놓기</span></div>
+        <div class="equation-line"><span>(외각의 크기의 합)</span><span>=</span><span class="dropzone" data-accept="180n">여기에 놓기</span><span>−</span><span class="dropzone" data-accept="180nminus2">여기에 놓기</span></div>
+        <div class="equation-line"><span>=</span><span class="dropzone" data-accept="360">여기에 놓기</span></div>
+        <div id="dragBank" class="drag-bank">
+          <button draggable="true" data-token="180n">180° × n</button>
+          <button draggable="true" data-token="180nminus2">180° × (n − 2)</button>
+          <button draggable="true" data-token="360">360°</button>
+        </div>
+        <button id="checkDerivation" class="primary small" type="button">식 확인</button>
+        <div id="derivationFeedback" class="feedback"></div>
+      </div>
+    </section>
+
+    <section class="card gated" data-step="5">
+      <div class="lock-cover"><span>🔒</span><b>교사가 활동 5를 열면 시작할 수 있습니다.</b></div>
+      <div class="step-head"><span class="step-no">5</span><div><h2>개념 적용하기 · 외각</h2><p>외각의 크기의 합을 이용하여 x의 값을 구해 봅시다.</p></div></div>
+      <div class="apply-grid">
+        <div id="exteriorApplyFigure" class="figure-card"></div>
+        <div class="question-panel"><p>그림에 표시된 외각이 90°, 60°, 70°, 30°, x°일 때</p><label>x = <input id="exteriorX" inputmode="numeric" /> °</label><button id="checkExteriorX" class="primary small" type="button">확인</button><div id="exteriorXFeedback" class="feedback"></div></div>
+      </div>
+    </section>
+
+    <section class="card gated" data-step="6">
+      <div class="lock-cover"><span>🔒</span><b>교사가 활동 6을 열면 시작할 수 있습니다.</b></div>
+      <div class="step-head"><span class="step-no">6</span><div><h2>정다각형의 한 내각과 한 외각</h2><p>문장 속 빈칸을 알맞은 말과 식으로 완성해 봅시다.</p></div></div>
+      <div class="sentence-work">
+        <p>정다각형은 내각의 크기가 모두 <span class="dropzone word" data-accept="same">빈칸</span>므로, 정n각형의 한 내각의 크기는 <span class="dropzone formula" data-accept="regularInterior">빈칸</span>이다.</p>
+        <p>또한 정다각형은 내각의 크기가 모두 <span class="dropzone word" data-accept="same">빈칸</span>므로 외각의 크기도 모두 같다. 따라서 정n각형의 한 외각의 크기는 <span class="dropzone formula" data-accept="regularExterior">빈칸</span>이다.</p>
+        <div class="drag-bank" id="regularBank">
+          <button draggable="true" data-token="same">같</button>
+          <button draggable="true" data-token="regularInterior">180° × (n − 2) ÷ n</button>
+          <button draggable="true" data-token="regularExterior">360° ÷ n</button>
+        </div>
+        <button id="checkRegular" class="primary small" type="button">문장 확인</button>
+        <div id="regularFeedback" class="feedback"></div>
+      </div>
+    </section>
+
+    <section class="card gated" data-step="7">
+      <div class="lock-cover"><span>🔒</span><b>교사가 활동 7을 열면 시작할 수 있습니다.</b></div>
+      <div class="step-head"><span class="step-no">7</span><div><h2>생각 더 나아가기</h2><p>계산이 맞더라도, 사용한 방법이 타당한지 설명해 봅시다.</p></div></div>
+      <div class="thinking-example">
+        <div id="badPentagon" class="figure-card small-figure"></div>
+        <div class="dialogue"><p><b>가람:</b> 오각형은 다섯 개의 삼각형으로 나눌 수 있으니까 내각의 크기의 합은 180° × 5 = 900°야.</p><p><b>질문:</b> 왜 다각형의 내각의 크기의 합을 구할 때 <u>한 꼭짓점에서 그을 수 있는 모든 대각선</u>을 그어야 할까요?</p></div>
+      </div>
+      <label class="long-answer">나의 설명<textarea id="finalReason" rows="6" placeholder="삼각형이 겹치거나 다각형 바깥이 포함되는 경우 등을 생각해 보세요."></textarea></label>
+      <button id="submitReason" class="primary" type="button">답안 제출</button>
+      <div id="finalReasonFeedback" class="feedback"></div>
     </section>
 
     <section class="finish-card">
-      <h2>탐구 완료</h2>
-      <p>모든 활동이 끝나면 제출 버튼을 누르세요.</p>
-      <button id="submitAll" class="primary" type="button">활동 제출</button>
-      <div id="submitFeedback" class="feedback" aria-live="polite"></div>
+      <h2>오늘의 활동 정리</h2>
+      <p>교사가 열어 준 활동을 모두 마쳤다면 제출하세요.</p>
+      <button id="submitAll" class="primary" type="button">전체 활동 제출</button>
+      <div id="submitFeedback" class="feedback"></div>
     </section>
   </main>
 
