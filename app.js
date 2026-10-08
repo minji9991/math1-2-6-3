@@ -9,8 +9,10 @@ const NS = 'http://www.w3.org/2000/svg';
 
 let studentId = '';
 let sessionId = '';
-let unlocked = {1:true,2:false,3:false,4:false,5:false,6:false,7:false};
+// 서버에서 실제 열림 상태를 읽기 전에는 모두 잠금으로 둡니다.
+let unlocked = {1:false,2:false,3:false,4:false,5:false,6:false,7:false};
 let selectedDragToken = null;
+const SESSION_KEY = 'polygon-angle-student-session-v21';
 
 const loginLayer = $('#loginLayer');
 const loginForm = $('#loginForm');
@@ -38,14 +40,39 @@ async function saveAnswer(activityKey,answer){
 }
 async function heartbeat(){
   if(!configured || !sessionId) return;
-  try{await supabase.from('activity_sessions').update({last_seen_at:new Date().toISOString()}).eq('id',sessionId);presenceBadge.textContent='접속 중';presenceBadge.classList.add('online');}
-  catch(e){console.error(e);presenceBadge.textContent='연결 확인 필요';}
+  const {error}=await supabase.from('activity_sessions')
+    .update({last_seen_at:new Date().toISOString()})
+    .eq('id',sessionId);
+  if(error){
+    console.error('heartbeat error',error);
+    presenceBadge.textContent='접속 확인 실패';
+    presenceBadge.classList.remove('online');
+    return false;
+  }
+  presenceBadge.textContent='접속 중';
+  presenceBadge.classList.add('online');
+  return true;
 }
 async function refreshControls(){
-  if(!configured){unlocked={1:true,2:true,3:true,4:true,5:true,6:true,7:true};applyLocks();return;}
+  if(!configured){
+    unlocked={1:true,2:true,3:true,4:true,5:true,6:true,7:true};
+    applyLocks();
+    return true;
+  }
   const {data,error}=await supabase.from('lesson_control').select('*').eq('id',1).maybeSingle();
-  if(error){console.error(error);return;}
-  if(data){for(let i=1;i<=7;i++) unlocked[i]=!!data[`step_${i}`];applyLocks();}
+  if(error){
+    console.error('lesson_control read error',error);
+    presenceBadge.textContent='활동 상태 연결 실패';
+    return false;
+  }
+  if(!data){
+    console.error('lesson_control row missing');
+    presenceBadge.textContent='활동 상태 없음';
+    return false;
+  }
+  for(let i=1;i<=7;i++) unlocked[i]=!!data[`step_${i}`];
+  applyLocks();
+  return true;
 }
 function applyLocks(){
   $$('.gated').forEach(sec=>{
@@ -59,25 +86,59 @@ function applyLocks(){
   });
 }
 
+async function enterStudentSession({restored=false}={}){
+  studentBadge.textContent=`학번 ${studentId}`;
+  setSave(configured?(restored?'접속 복원됨':'접속 저장됨'):'연습 모드');
+  presenceBadge.textContent='연결 확인 중';
+  loginLayer.classList.add('hidden');
+  await refreshControls();
+  await heartbeat();
+  if(!restored) saveEvent('session_started');
+}
+
 loginForm.addEventListener('submit', async e=>{
   e.preventDefault();
   const raw=$('#studentId').value.trim();
   if(!/^\d{4,8}$/.test(raw)){loginMsg.textContent='학번은 숫자 4~8자리로 입력하세요.';return;}
-  studentId=raw;sessionId=crypto.randomUUID();
+  studentId=raw;
+  sessionId=crypto.randomUUID();
   if(configured){
     loginMsg.textContent='접속 기록 저장 중…';
     const now=new Date().toISOString();
     const {error}=await supabase.from('activity_sessions').insert({id:sessionId,student_id:studentId,user_agent:navigator.userAgent,last_seen_at:now});
-    if(error){console.error(error);loginMsg.textContent='Supabase 저장에 실패했습니다. 교사에게 알려 주세요.';return;}
+    if(error){
+      console.error('session insert error',error);
+      loginMsg.textContent=`접속 저장 실패: ${error.message}`;
+      return;
+    }
   }
-  studentBadge.textContent=`학번 ${studentId}`;setSave(configured?'접속 저장됨':'연습 모드');presenceBadge.textContent='접속 중';loginLayer.classList.add('hidden');
-  saveEvent('session_started');await refreshControls();heartbeat();
+  sessionStorage.setItem(SESSION_KEY,JSON.stringify({studentId,sessionId}));
+  await enterStudentSession();
 });
+
+// 새로고침해도 같은 학생 세션을 이어서 사용합니다.
+try{
+  const saved=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
+  if(saved?.studentId && saved?.sessionId){
+    studentId=String(saved.studentId);
+    sessionId=String(saved.sessionId);
+    enterStudentSession({restored:true});
+  }else{
+    loginLayer.classList.remove('hidden');
+  }
+}catch(e){
+  console.error('session restore error',e);
+  sessionStorage.removeItem(SESSION_KEY);
+  loginLayer.classList.remove('hidden');
+}
 
 document.addEventListener('visibilitychange',()=>{if(!sessionId)return;saveEvent(document.visibilityState==='hidden'?'page_hidden':'page_visible',{visibility:document.visibilityState});heartbeat();});
 window.addEventListener('beforeunload',()=>{if(sessionId)saveEvent('page_unload');});
 setInterval(()=>{if(sessionId && document.visibilityState==='visible')heartbeat();},20000);
 setInterval(()=>{if(sessionId)refreshControls();},3000);
+
+
+applyLocks();
 
 // ---------- 활동 1: 내각의 합 ----------
 const interiorPolygons=$('#interiorPolygons');
@@ -232,4 +293,3 @@ $('#submitReason').addEventListener('click',()=>{const ans=$('#finalReason').val
 
 $('#submitAll').addEventListener('click',async()=>{if(!sessionId){feedback('#submitFeedback','먼저 학번으로 접속해 주세요.',false);return;}if(configured){const {error}=await supabase.from('activity_sessions').update({submitted_at:new Date().toISOString(),last_seen_at:new Date().toISOString()}).eq('id',sessionId);if(error){feedback('#submitFeedback','제출 저장에 실패했습니다.',false);return;}}feedback('#submitFeedback','전체 활동이 제출되었습니다.',true);saveEvent('all_submitted');});
 
-applyLocks();
