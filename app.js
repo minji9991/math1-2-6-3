@@ -2,7 +2,14 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-config.js';
 
 const configured = SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.startsWith('YOUR_') && !SUPABASE_ANON_KEY.startsWith('YOUR_');
-const supabase = configured ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const supabase = configured ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+    storageKey: 'polygon-student-anon-v22'
+  }
+}) : null;
 const $ = (s, root=document) => root.querySelector(s);
 const $$ = (s, root=document) => [...root.querySelectorAll(s)];
 const NS = 'http://www.w3.org/2000/svg';
@@ -12,7 +19,6 @@ let sessionId = '';
 // 서버에서 실제 열림 상태를 읽기 전에는 모두 잠금으로 둡니다.
 let unlocked = {1:false,2:false,3:false,4:false,5:false,6:false,7:false};
 let selectedDragToken = null;
-const SESSION_KEY = 'polygon-angle-student-session-v21';
 
 const loginLayer = $('#loginLayer');
 const loginForm = $('#loginForm');
@@ -40,9 +46,7 @@ async function saveAnswer(activityKey,answer){
 }
 async function heartbeat(){
   if(!configured || !sessionId) return;
-  const {error}=await supabase.from('activity_sessions')
-    .update({last_seen_at:new Date().toISOString()})
-    .eq('id',sessionId);
+  const {error}=await supabase.rpc('touch_activity_session',{p_session_id:sessionId});
   if(error){
     console.error('heartbeat error',error);
     presenceBadge.textContent='접속 확인 실패';
@@ -88,7 +92,7 @@ function applyLocks(){
 
 async function enterStudentSession({restored=false}={}){
   studentBadge.textContent=`학번 ${studentId}`;
-  setSave(configured?(restored?'접속 복원됨':'접속 저장됨'):'연습 모드');
+  setSave(configured?'접속 저장됨':'연습 모드');
   presenceBadge.textContent='연결 확인 중';
   loginLayer.classList.add('hidden');
   await refreshControls();
@@ -102,35 +106,26 @@ loginForm.addEventListener('submit', async e=>{
   if(!/^\d{4,8}$/.test(raw)){loginMsg.textContent='학번은 숫자 4~8자리로 입력하세요.';return;}
   studentId=raw;
   sessionId=crypto.randomUUID();
+  loginMsg.textContent='';
   if(configured){
     loginMsg.textContent='접속 기록 저장 중…';
-    const now=new Date().toISOString();
-    const {error}=await supabase.from('activity_sessions').insert({id:sessionId,student_id:studentId,user_agent:navigator.userAgent,last_seen_at:now});
+    const {error}=await supabase.from('activity_sessions').insert({
+      id:sessionId,
+      student_id:studentId,
+      user_agent:navigator.userAgent
+    });
     if(error){
       console.error('session insert error',error);
       loginMsg.textContent=`접속 저장 실패: ${error.message}`;
       return;
     }
   }
-  sessionStorage.setItem(SESSION_KEY,JSON.stringify({studentId,sessionId}));
   await enterStudentSession();
 });
 
-// 새로고침해도 같은 학생 세션을 이어서 사용합니다.
-try{
-  const saved=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
-  if(saved?.studentId && saved?.sessionId){
-    studentId=String(saved.studentId);
-    sessionId=String(saved.sessionId);
-    enterStudentSession({restored:true});
-  }else{
-    loginLayer.classList.remove('hidden');
-  }
-}catch(e){
-  console.error('session restore error',e);
-  sessionStorage.removeItem(SESSION_KEY);
-  loginLayer.classList.remove('hidden');
-}
+// 학생용 페이지는 교사용 로그인 세션과 완전히 분리합니다.
+// 새로고침하면 학번을 다시 입력해 새 세션을 시작합니다.
+loginLayer.classList.remove('hidden');
 
 document.addEventListener('visibilitychange',()=>{if(!sessionId)return;saveEvent(document.visibilityState==='hidden'?'page_hidden':'page_visible',{visibility:document.visibilityState});heartbeat();});
 window.addEventListener('beforeunload',()=>{if(sessionId)saveEvent('page_unload');});
